@@ -111,4 +111,27 @@ PRODUCTS = {
     }
 }
 
+def send_discord_message(info, url, status):
+    """发送补货通知到 Discord"""
+    payload = {
+        "content": "@everyone ⚡ 补货提醒！",
+        "embeds": [
+            {
+                "title": info["name"],
+                "url": url,
+                "image": {"url": info["img"]},   # ✅ 改成 image，显示大图
+                "fields": [
+                    {"name": "💰 PRICE", "value": info.get("price", "N/A"), "inline": True},
+                    {"name": "🆔 PRODUCT", "value": info.get("product_id", "N/A"), "inline": True},
+                    {"name": "🆔 SKU", "value": info.get("sku", "N/A"), "inline": True},
+                    {"name": "📊 STOCK", "value": status, "inline": True},
+                    {"name": "🛒 ATC", "value": "x1 | x2", "inline": True},
+                    {"name": "📅 RELEASE DATE", "value": "2025-08-06", "inline": False},
+                    {"name": "购买链接", "value": f"[点我购买]({url})", "inline": False},
+                ],
+                "color": 16711680
+            }
+        ]
+    }
+    requests.post(DISCORD_WEBHOOK, json=payload)
 
