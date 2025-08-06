@@ -1,30 +1,32 @@
-def send_discord(name: str, url: str, img: str, status: str):
-    if not DISCORD_WEBHOOK:
-        raise ValueError("❌ 没有设置 DISCORD_WEBHOOK 环境变量")
+name: Labubu Stock Monitor
 
-    embed = {
-        "title": name,
-        "url": url,
-        "color": 5763719,
-        "thumbnail": {"url": img},   # 左侧小图
-        "image": {"url": img},       # 下方大图
-        "fields": [
-            {"name": "💰 PRICE", "value": "24.90 SGD", "inline": True},
-            {"name": "🆔 PRODUCT", "value": "6572", "inline": True},
-            {"name": "🆔 SKU", "value": "10076", "inline": True},
-            {"name": "📊 STOCK", "value": status, "inline": True},
-            {"name": "🛒 ATC", "value": "x1 | x2", "inline": True},
-            {"name": "📅 RELEASE DATE", "value": "2025-08-06", "inline": False},
-            {"name": "购买链接", "value": f"[点我购买]({url})", "inline": False}
-        ],
-        "footer": {"text": "Popmart Labubu 补货监控"}
-    }
+on:
+  schedule:
+    - cron: "*/10 * * * *"   # 每 10 分钟跑一次
+  workflow_dispatch:
+    inputs:
+      test_mode:
+        description: "是否启用演示模式？"
+        required: false
+        default: "false"
 
-    payload = {
-        "content": "@everyone ⚡ 补货提醒！",
-        "embeds": [embed]
-    }
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-    resp = requests.post(DISCORD_WEBHOOK, json=payload)
-    if resp.status_code != 204:
-        print(f"❌ Discord 发送失败: {resp.text}")
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4
+
+      - name: Run monitor
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          TEST_MODE: ${{ github.event.inputs.test_mode || 'false' }}
+        run: python monitor.py
