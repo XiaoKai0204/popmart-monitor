@@ -1,0 +1,26 @@
+name: Popmart Labubu Monitor
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"   # 每 10 分钟运行一次
+  workflow_dispatch:          # 允许手动触发
+
+jobs:
+  check-stock:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: Install Dependencies
+        run: pip install requests beautifulsoup4
+
+      - name: Run Monitor
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: python monitor.py
