@@ -1,6 +1,9 @@
-# monitor.py
+import requests
+from bs4 import BeautifulSoup
+import os
+import time
 
-# 要监控的商品链接 + 名称（字典格式）
+# 要监控的商品链接 + 名称
 PRODUCTS = {
     "https://www.lazada.sg/products/i3339762748-s22353226995.html": "LABUBU HIDE AND SEEK IN SINGAPORE 鱼尾狮挂件 (Lazada) – $37.90",
     "https://www.lazada.sg/products/pdp-i3437613695.html": "LABUBU THE MONSTERS 前方高能3.0系列盲盒 (Lazada) – $24.90",
@@ -20,3 +23,37 @@ PRODUCTS = {
     "https://shopee.sg/POP-MART-THE-MONSTERS-Big-into-Energy-Series-Vinyl-Plush-Pendant-Blind-Box-i.1302248623.26834776484": "LABUBU THE MONSTERS 前方高能3.0盲盒单盒 (Shopee) – $24.90",
     "https://shopee.sg/POP-MART-THE-MONSTERS-Big-into-Energy-Series-Vinyl-Plush-Pendant-Blind-Box-(Whole-Set)-i.1302248623.24344527163": "LABUBU THE MONSTERS 前方高能3.0盲盒整端 (Shopee) – $149.40"
 }
+
+# Discord Webhook（从 GitHub Secrets 里读取）
+DISCORD_WEBHOOK = os.getenv("DISCORD_WEBHOOK")
+
+
+def check_stock(url: str, name: str):
+    """检测单个商品库存"""
+    try:
+        headers = {"User-Agent": "Mozilla/5.0"}
+        resp = requests.get(url, headers=headers, timeout=10)
+
+        # 直接判断关键字（不同平台可能不同）
+        if any(key in resp.text for key in ["Add to Cart", "Buy Now", "加入购物车", "立即购买"]):
+            send_discord(f"⚡ @everyone 补货啦！\n{name}\n👉 {url}")
+        else:
+            print(f"❌ 还没补货: {name}")
+    except Exception as e:
+        print(f"⚠️ 检查失败 {name}: {e}")
+
+
+def send_discord(msg: str):
+    """发送 Discord 消息"""
+    if not DISCORD_WEBHOOK:
+        raise ValueError("❌ 没有设置 DISCORD_WEBHOOK 环境变量")
+    payload = {"content": msg}
+    resp = requests.post(DISCORD_WEBHOOK, json=payload)
+    if resp.status_code != 204:
+        print(f"❌ Discord 发送失败: {resp.text}")
+
+
+if __name__ == "__main__":
+    for url, name in PRODUCTS.items():
+        check_stock(url, name)
+        time.sleep(2)  # 避免请求太快被封
