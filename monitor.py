@@ -1,3 +1,8 @@
+import requests
+import os
+import time
+
+# ====== 商品列表（15个链接）======
 PRODUCTS = {
     # Lazada
     "https://www.lazada.sg/products/i3339762748-s22353226995.html": {
@@ -110,3 +115,40 @@ PRODUCTS = {
         "sku": "N/A"
     }
 }
+
+# ====== Discord 配置 ======
+DISCORD_WEBHOOK = os.getenv("DISCORD_WEBHOOK")
+
+def send_test_message():
+    """发送测试消息到 Discord"""
+    if not DISCORD_WEBHOOK:
+        raise ValueError("❌ 没有设置 DISCORD_WEBHOOK 环境变量")
+    payload = {
+        "content": "✅ Popmart Labubu 补货监控已启动！(测试消息)",
+        "embeds": [
+            {
+                "title": "测试推送成功 🎉",
+                "description": "说明 GitHub Actions 和 Discord Webhook 已经连通！",
+                "color": 65280
+            }
+        ]
+    }
+    resp = requests.post(DISCORD_WEBHOOK, json=payload)
+    if resp.status_code != 204:
+        print(f"❌ Discord 发送失败: {resp.text}")
+    else:
+        print("✅ 测试消息已发送到 Discord")
+
+def check_stock(url, info):
+    """这里可以加真实库存检测逻辑"""
+    print(f"正在检查: {info['name']} ({url})")
+
+if __name__ == "__main__":
+    # 先发一条测试消息
+    send_test_message()
+
+    # 然后循环检查所有商品
+    for url, info in PRODUCTS.items():
+        check_stock(url, info)
+        time.sleep(2)
+
