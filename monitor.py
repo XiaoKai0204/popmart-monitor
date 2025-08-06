@@ -118,7 +118,7 @@ PRODUCTS = {
 }
 
 # 你的 Discord Webhook
-DISCORD_WEBHOOK = "你的Webhook URL"
+DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1401147411669323776/32H72zNxCrHSEQkh7SvtzMEcEBOq7n8OJ7Xcyv-HzQcQGskRLWoDgvH2jMVJn8W2xY5F"
 
 # 保存上一次状态
 last_status = {}
