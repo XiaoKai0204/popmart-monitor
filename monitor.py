@@ -110,21 +110,22 @@ PRODUCTS = {
         "sku": "N/A"
     }
 }
+import requests
+
+DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1401147411669323776/32H72zNxCrHSEQkh7SvtzMEcEBOq7n8OJ7Xcyv-HzQcQGskRLWoDgvH2jMVJn8W2xY5F"
 
 
-  PRODUCTS = {
-    # ... 这里保持你的商品字典，不动
-}
+   
 
+# 发消息函数
 def send_discord_message(info, url, status):
-    """发送补货通知到 Discord"""
     payload = {
         "content": "@everyone ⚡ 补货提醒！",
         "embeds": [
             {
                 "title": info["name"],
                 "url": url,
-                "image": {"url": info["img"]},   # ✅ 改成 image，显示大图
+                "image": {"url": info["img"]},
                 "fields": [
                     {"name": "💰 PRICE", "value": info.get("price", "N/A"), "inline": True},
                     {"name": "🆔 PRODUCT", "value": info.get("product_id", "N/A"), "inline": True},
@@ -139,4 +140,11 @@ def send_discord_message(info, url, status):
         ]
     }
     requests.post(DISCORD_WEBHOOK, json=payload)
+
+# 测试推送
+def test_push():
+    url, info = list(PRODUCTS.items())[0]  # 拿第一个商品
+    send_discord_message(info, url, "In Stock ✅")
+
+test_push()
 
