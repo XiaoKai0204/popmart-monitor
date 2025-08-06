@@ -111,6 +111,11 @@ PRODUCTS = {
     }
 }
 
+
+  PRODUCTS = {
+    # ... 这里保持你的商品字典，不动
+}
+
 def send_discord_message(info, url, status):
     """发送补货通知到 Discord"""
     payload = {
