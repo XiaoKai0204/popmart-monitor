@@ -1,10 +1,3 @@
-import requests
-import os
-import time
-import random
-
-DISCORD_WEBHOOK = os.getenv("DISCORD_WEBHOOK")
-
 PRODUCTS = {
     # Lazada
     "https://www.lazada.sg/products/i3339762748-s22353226995.html": {
@@ -117,57 +110,5 @@ PRODUCTS = {
         "sku": "N/A"
     }
 }
-
-
-def send_discord_message(info, url, status):
-    """发送补货通知到 Discord"""
-    payload = {
-        "content": f"@everyone ⚡ 补货提醒！",
-        "embeds": [
-            {
-                "title": info["name"],
-                "url": url,
-                "thumbnail": {"url": info["img"]},
-                "fields": [
-                    {"name": "💰 PRICE", "value": info.get("price", "N/A"), "inline": True},
-                    {"name": "🆔 PRODUCT", "value": info.get("product_id", "N/A"), "inline": True},
-                    {"name": "🆔 SKU", "value": info.get("sku", "N/A"), "inline": True},
-                    {"name": "📊 STOCK", "value": status, "inline": True},
-                    {"name": "🛒 ATC", "value": "x1 | x2", "inline": True},
-                    {"name": "📅 RELEASE DATE", "value": "2025-08-06", "inline": False},
-                    {"name": "购买链接", "value": f"[点我购买]({url})", "inline": False},
-                ],
-                "color": 16711680
-            }
-        ]
-    }
-    requests.post(DISCORD_WEBHOOK, json=payload)
-
-
-def check_stock(url, info):
-    """模拟检测库存（正式要换成真实接口）"""
-    status = random.choice(["In Stock", "Out of Stock"])  # ⚡ 随机库存状态
-    print(f"检查 {info['name']} -> {status}")
-
-    if status == "In Stock":
-        send_discord_message(info, url, status)
-
-
-if __name__ == "__main__":
-    # 启动时发一条测试消息
-    payload = {
-        "content": "✅ Popmart Labubu 补货监控已启动！(测试消息)",
-        "embeds": [
-            {"title": "测试推送成功 🎉", "description": "说明 GitHub Actions 和 Discord Webhook 已经连通！", "color": 65280}
-        ]
-    }
-    requests.post(DISCORD_WEBHOOK, json=payload)
-
-    # 循环检测
-    while True:
-        for url, info in PRODUCTS.items():
-            check_stock(url, info)
-            time.sleep(2)
-        time.sleep(60)  # 每轮间隔 60 秒
 
 
